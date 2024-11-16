@@ -1,0 +1,17 @@
+<!-- accounts/templates/accounts/delete_account.html -->
+
+{% extends 'accounts/base.html' %}
+
+{% block title %}Видалення акаунта{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Ви впевнені, що хочете видалити акаунт?</h2>
+    <p>Цю дію неможливо скасувати.</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Видалити акаунт</button>
+        <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">Скасувати</a>
+    </form>
+</div>
+{% endblock %}

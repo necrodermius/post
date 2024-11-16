@@ -1,0 +1,53 @@
+<!-- accounts/templates/accounts/profile.html -->
+
+{% extends 'accounts/base.html' %}
+
+{% block title %}Профіль{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Вітаємо, {{ user.username }}!</h2>
+    <p>Електронна пошта: {{ user.email }}</p>
+
+    {% if user.country or user.city or user.street or user.building %}
+        <h3>Адреса:</h3>
+        <p>
+            {{ user.country }}, {{ user.city }},
+            {{ user.street }} {{ user.building }}
+            {% if user.postal_code %} ({{ user.postal_code }}){% endif %}
+        </p>
+    {% else %}
+        <p>Адреса не вказана. <a href="{% url 'accounts:edit_profile' %}">Додати адресу</a></p>
+    {% endif %}
+
+    <h3>Посилки:</h3>
+
+    <h4>Відправлені посилки:</h4>
+    {% if sent_parcels %}
+        <ul>
+            {% for parcel in sent_parcels %}
+                <li>Трек-номер: {{ parcel.tracking_number }}, Статус: {{ parcel.status }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Ви ще не відправили жодної посилки.</p>
+    {% endif %}
+
+    <h4>Посилки, які ви отримуєте:</h4>
+    {% if received_parcels %}
+        <ul>
+            {% for parcel in received_parcels %}
+                <li>Трек-номер: {{ parcel.tracking_number }}, Статус: {{ parcel.status }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Наразі ви не отримуєте жодної посилки.</p>
+    {% endif %}
+
+    <!-- Кнопки внизу сторінки -->
+    <div class="mt-4">
+        <a href="{% url 'accounts:edit_profile' %}" class="btn btn-primary">Редагувати профіль</a>
+        <a href="{% url 'accounts:delete_account' %}" class="btn btn-danger">Видалити акаунт</a>
+    </div>
+</div>
+{% endblock %}

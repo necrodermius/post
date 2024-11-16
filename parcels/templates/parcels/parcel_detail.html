@@ -1,0 +1,15 @@
+{% extends 'parcels/base.html' %}
+
+{% block title %}Деталі посилки{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Деталі посилки</h2>
+    <p><strong>Трек-номер:</strong> {{ parcel.tracking_number }}</p>
+    <p><strong>Відправник:</strong> {{ parcel.sender.username }}</p>
+    <p><strong>Отримувач:</strong> {{ parcel.recipient.username }}</p>
+    <p><strong>Вага:</strong> {{ parcel.weight }} кг</p>
+    <p><strong>Опис:</strong> {{ parcel.description }}</p>
+    <p><strong>Статус:</strong> {{ parcel.status }}</p>
+</div>
+{% endblock %}
