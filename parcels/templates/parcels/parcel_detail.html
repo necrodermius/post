@@ -7,9 +7,29 @@
     <h2>Деталі посилки</h2>
     <p><strong>Трек-номер:</strong> {{ parcel.tracking_number }}</p>
     <p><strong>Відправник:</strong> {{ parcel.sender.username }}</p>
+    <p><strong>Адреса відправника:</strong> {{ parcel.sender_address }}</p>
     <p><strong>Отримувач:</strong> {{ parcel.recipient.username }}</p>
+    <p><strong>Адреса отримувача:</strong> {{ parcel.recipient_address }}</p>
     <p><strong>Вага:</strong> {{ parcel.weight }} кг</p>
     <p><strong>Опис:</strong> {{ parcel.description }}</p>
-    <p><strong>Статус:</strong> {{ parcel.status }}</p>
+    <p><strong>Статус:</strong> {{ parcel.get_status_display }}</p>
+    {% if parcel.redirected %}
+        <p><strong>Переадресовано на адресу:</strong> {{ parcel.redirect_address }}</p>
+    {% endif %}
+    {% if parcel.current_location %}
+        <p><strong>Поточне місцезнаходження:</strong> {{ parcel.current_location }}</p>
+    {% endif %}
+    {% if parcel.estimated_delivery_time %}
+        <p><strong>Очікуваний час доставки:</strong> {{ parcel.estimated_delivery_time|date:"d.m.Y H:i" }}</p>
+    {% endif %}
+    <!-- Кнопки дій -->
+    <div class="mt-3">
+        {% if user == parcel.recipient and parcel.status != 'delivered' %}
+            <a href="{% url 'parcels:redirect' parcel.tracking_number %}" class="btn btn-warning">Переадресувати посилку</a>
+        {% endif %}
+        {% if user == parcel.sender %}
+            <a href="{% url 'parcels:edit' parcel.tracking_number %}" class="btn btn-secondary">Редагувати посилку</a>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}

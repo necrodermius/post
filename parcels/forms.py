@@ -1,6 +1,7 @@
 from django import forms
 from .models import Parcel
 from accounts.models import User
+from .utils import generate_unique_tracking_number
 
 class ParcelForm(forms.ModelForm):
     recipient_username = forms.CharField(label="Ім'я користувача отримувача")
@@ -27,3 +28,11 @@ class ParcelForm(forms.ModelForm):
         if commit:
             parcel.save()
         return parcel
+
+class RedirectParcelForm(forms.ModelForm):
+    class Meta:
+        model = Parcel
+        fields = ['redirect_address']
+        widgets = {
+            'redirect_address': forms.TextInput(attrs={'placeholder': 'Введіть нову адресу'})
+        }

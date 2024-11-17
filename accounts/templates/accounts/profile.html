@@ -22,24 +22,86 @@
 
     <h3>Посилки:</h3>
 
+    <!-- Сортування відправлених посилок -->
     <h4>Відправлені посилки:</h4>
+    <form method="get" class="form-inline mb-3">
+        <!-- Зберігаємо параметр сортування отриманих посилок -->
+        <input type="hidden" name="sort_received_by" value="{{ sort_received_by }}">
+        <label for="sort_sent_by" class="mr-2">Сортувати відправлені посилки за:</label>
+        <select name="sort_sent_by" id="sort_sent_by" class="form-control mr-2">
+            <option value="recipient__username" {% if sort_sent_by == 'recipient__username' %}selected{% endif %}>Ім'я отримувача</option>
+            <option value="description" {% if sort_sent_by == 'description' %}selected{% endif %}>Опис</option>
+            <option value="weight" {% if sort_sent_by == 'weight' %}selected{% endif %}>Вага</option>
+            <option value="status" {% if sort_sent_by == 'status' %}selected{% endif %}>Статус</option>
+        </select>
+        <button type="submit" class="btn btn-primary">Сортувати</button>
+    </form>
+
     {% if sent_parcels %}
-        <ul>
-            {% for parcel in sent_parcels %}
-                <li>Трек-номер: {{ parcel.tracking_number }}, Статус: {{ parcel.status }}</li>
-            {% endfor %}
-        </ul>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Трек-номер</th>
+                    <th>Отримувач</th>
+                    <th>Опис</th>
+                    <th>Вага</th>
+                    <th>Статус</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for parcel in sent_parcels %}
+                    <tr>
+                        <td><a href="{% url 'parcels:detail' tracking_number=parcel.tracking_number %}">{{ parcel.tracking_number }}</a></td>
+                        <td>{{ parcel.recipient.username }}</td>
+                        <td>{{ parcel.description }}</td>
+                        <td>{{ parcel.weight }} кг</td>
+                        <td>{{ parcel.get_status_display }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     {% else %}
         <p>Ви ще не відправили жодної посилки.</p>
     {% endif %}
 
+    <!-- Сортування отриманих посилок -->
     <h4>Посилки, які ви отримуєте:</h4>
+    <form method="get" class="form-inline mb-3">
+        <!-- Зберігаємо параметр сортування відправлених посилок -->
+        <input type="hidden" name="sort_sent_by" value="{{ sort_sent_by }}">
+        <label for="sort_received_by" class="mr-2">Сортувати отримані посилки за:</label>
+        <select name="sort_received_by" id="sort_received_by" class="form-control mr-2">
+            <option value="sender__username" {% if sort_received_by == 'sender__username' %}selected{% endif %}>Ім'я відправника</option>
+            <option value="description" {% if sort_received_by == 'description' %}selected{% endif %}>Опис</option>
+            <option value="weight" {% if sort_received_by == 'weight' %}selected{% endif %}>Вага</option>
+            <option value="status" {% if sort_received_by == 'status' %}selected{% endif %}>Статус</option>
+        </select>
+        <button type="submit" class="btn btn-primary">Сортувати</button>
+    </form>
+
     {% if received_parcels %}
-        <ul>
-            {% for parcel in received_parcels %}
-                <li>Трек-номер: {{ parcel.tracking_number }}, Статус: {{ parcel.status }}</li>
-            {% endfor %}
-        </ul>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Трек-номер</th>
+                    <th>Відправник</th>
+                    <th>Опис</th>
+                    <th>Вага</th>
+                    <th>Статус</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for parcel in received_parcels %}
+                    <tr>
+                        <td><a href="{% url 'parcels:detail' tracking_number=parcel.tracking_number %}">{{ parcel.tracking_number }}</a></td>
+                        <td>{{ parcel.sender.username }}</td>
+                        <td>{{ parcel.description }}</td>
+                        <td>{{ parcel.weight }} кг</td>
+                        <td>{{ parcel.get_status_display }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     {% else %}
         <p>Наразі ви не отримуєте жодної посилки.</p>
     {% endif %}

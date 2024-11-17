@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Переадресація посилки{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Переадресація посилки {{ parcel.tracking_number }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Переадресувати</button>
+        <a href="{% url 'parcels:detail' parcel.tracking_number %}" class="btn btn-secondary">Скасувати</a>
+    </form>
+</div>
+{% endblock %}
