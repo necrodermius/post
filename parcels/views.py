@@ -7,6 +7,7 @@ from .models import Parcel
 from .forms import RedirectParcelForm
 from .tasks import process_redirected_parcel
 
+
 @login_required
 def create_parcel_view(request):
     if request.method == 'POST':
@@ -72,3 +73,26 @@ def edit_parcel_view(request, tracking_number):
     else:
         form = ParcelForm(instance=parcel)
     return render(request, 'parcels/edit_parcel.html', {'form': form, 'parcel': parcel})
+
+
+# parcels/views.py
+
+@login_required
+def receive_parcel_view(request, tracking_number):
+    parcel = get_object_or_404(Parcel, tracking_number=tracking_number, recipient=request.user)
+    if not parcel.is_paid:
+        messages.error(request, "Ви повинні спочатку оплатити посилку.")
+        return redirect('payments:pay', tracking_number=tracking_number)
+    if parcel.is_received:
+        messages.info(request, "Ви вже отримали цю посилку.")
+        return redirect('parcels:detail', tracking_number=tracking_number)
+    if request.method == 'POST':
+        parcel.is_received = True
+        parcel.status = 'delivered'
+        parcel.save()
+        messages.success(request, "Ви успішно отримали посилку.")
+        return redirect('parcels:detail', tracking_number=tracking_number)
+    return render(request, 'parcels/receive_parcel.html', {'parcel': parcel})
+
+
+

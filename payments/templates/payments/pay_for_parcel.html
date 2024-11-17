@@ -1,0 +1,17 @@
+{% extends 'payments/base.html' %}
+
+{% block title %}Оплата посилки{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Оплата посилки {{ parcel.tracking_number }}</h2>
+    <p><strong>Відправник:</strong> {{ parcel.sender.username }}</p>
+    <p><strong>Опис:</strong> {{ parcel.description }}</p>
+    <p><strong>Вага:</strong> {{ parcel.weight }} кг</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Оплатити доставку</button>
+        <a href="{% url 'parcels:detail' tracking_number=parcel.tracking_number %}" class="btn btn-secondary">Скасувати</a>
+    </form>
+</div>
+{% endblock %}

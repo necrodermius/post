@@ -8,8 +8,11 @@ class Parcel(models.Model):
         ('pending', 'Очікує відправки'),
         ('in_sorting_center', 'У сортувальному центрі'),
         ('in_transit', 'В дорозі'),
+        ('ready_for_pickup', 'Готова до отримання'),
         ('delivered', 'Доставлено'),
     ]
+
+
 
     sender = models.ForeignKey(User, related_name='sent_parcels', on_delete=models.CASCADE, verbose_name="Відправник")
     recipient = models.ForeignKey(User, related_name='received_parcels', on_delete=models.CASCADE, verbose_name="Отримувач")
@@ -26,9 +29,17 @@ class Parcel(models.Model):
     redirected = models.BooleanField(default=False, verbose_name="Переадресовано")
     redirect_address = models.CharField(max_length=255, blank=True, null=True, verbose_name="Нова адреса доставки")
     current_location = models.CharField(max_length=255, blank=True, null=True, verbose_name="Поточне місцезнаходження")
+    is_paid = models.BooleanField(default=False, verbose_name="Оплачено")
+    is_received = models.BooleanField(default=False, verbose_name="Отримано")
+    paid_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата оплати")
+    hidden_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата приховування")
 
     def __str__(self):
         return f"Посилка {self.tracking_number} від {self.sender} до {self.recipient}"
+
+    def __init__(self, *args, **kwargs):
+        super(Parcel, self).__init__(*args, **kwargs)
+        self._original_status = self.status
 
     def sender_address(self):
         return f"{self.sender.country}, {self.sender.city}, {self.sender.street} {self.sender.building}"

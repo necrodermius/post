@@ -13,7 +13,7 @@ def handle_payment_update(sender, instance, created, **kwargs):
         send_mail(
             'Квитанція про оплату',
             f'Ваш платіж на суму {instance.amount} успішно завершено.\nДякуємо за користування нашими послугами!',
-            'no-reply@example.com',
+            'maksym.putin.django@gmail.com',
             [instance.user.email],
             fail_silently=False,
         )

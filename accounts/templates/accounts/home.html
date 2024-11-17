@@ -1,0 +1,16 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}Головна сторінка{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Ласкаво просимо на нашу поштову службу!</h1>
+    <p>Це головна сторінка вашого сайту. Ви можете відправляти та отримувати посилки з легкістю.</p>
+
+    {% if user.is_authenticated %}
+        <p>Перейдіть до свого <a href="{% url 'accounts:profile' %}">профілю</a>, щоб переглянути ваші посилки.</p>
+    {% else %}
+        <p>Будь ласка, <a href="{% url 'accounts:login' %}">увійдіть</a> або <a href="{% url 'accounts:register' %}">зареєструйтесь</a>, щоб скористатися нашими послугами.</p>
+    {% endif %}
+</div>
+{% endblock %}

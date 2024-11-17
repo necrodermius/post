@@ -8,6 +8,8 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from parcels.models import Parcel
 from django.db.models import Q
+from django.utils import timezone
+from datetime import timedelta
 
 def register_view(request):
     if request.method == 'POST':
@@ -83,14 +85,26 @@ def profile_view(request):
     sent_parcels = Parcel.objects.filter(sender=request.user).order_by(sort_sent_by)
     received_parcels = Parcel.objects.filter(recipient=request.user).order_by(sort_received_by)
 
+
+
+    one_hour_ago = timezone.now() - timedelta(hours=1)
+    recent_paid_parcels = Parcel.objects.filter(
+        recipient=request.user,
+        is_paid=True,
+        is_received=False,
+        paid_at__gte=one_hour_ago
+    )
+
     return render(request, 'accounts/profile.html', {
         'sent_parcels': sent_parcels,
         'received_parcels': received_parcels,
         'sort_sent_by': sort_sent_by,
         'sort_received_by': sort_received_by,
+        'recent_paid_parcels': recent_paid_parcels,
     })
 
-
+def home_view(request):
+    return render(request, 'accounts/home.html')
 
 
 

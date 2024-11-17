@@ -22,9 +22,16 @@
     {% if parcel.estimated_delivery_time %}
         <p><strong>Очікуваний час доставки:</strong> {{ parcel.estimated_delivery_time|date:"d.m.Y H:i" }}</p>
     {% endif %}
+
     <!-- Кнопки дій -->
     <div class="mt-3">
-        {% if user == parcel.recipient and parcel.status != 'delivered' %}
+        {% if user == parcel.recipient and parcel.status == 'ready_for_pickup' and not parcel.is_paid %}
+            <a href="{% url 'payments:pay' parcel.tracking_number %}" class="btn btn-primary">Оплатити доставку</a>
+        {% endif %}
+        {% if user == parcel.recipient and parcel.is_paid and not parcel.is_received %}
+            <a href="{% url 'parcels:receive' parcel.tracking_number %}" class="btn btn-success">Отримати посилку</a>
+        {% endif %}
+        {% if user == parcel.recipient and parcel.status != 'delivered' and not parcel.is_received %}
             <a href="{% url 'parcels:redirect' parcel.tracking_number %}" class="btn btn-warning">Переадресувати посилку</a>
         {% endif %}
         {% if user == parcel.sender %}

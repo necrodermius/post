@@ -1,4 +1,3 @@
-<!-- templates/base.html -->
 <!DOCTYPE html>
 <html lang="uk">
 <head>
@@ -11,18 +10,30 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
- <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="#">Пошта</a>
-        {% if user.is_authenticated %}
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'parcels:create' %}">Відправити посилку</a>
-        </li>
-    {% endif %}
-        <div class="collapse navbar-collapse">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <!-- Бренд або логотип -->
+        <a class="navbar-brand" href="{% url 'accounts:home' %}">Пошта</a>
+        <!-- Кнопка для мобільних пристроїв -->
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Переключити навігацію">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <!-- Навігаційні елементи -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- Ліва частина меню -->
+            <ul class="navbar-nav">
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'parcels:create' %}">Відправити посилку</a>
+                    </li>
+                {% else %}
+                    <!-- Пункти меню для незареєстрованих користувачів (якщо потрібно) -->
+                {% endif %}
+            </ul>
+            <!-- Права частина меню -->
             <ul class="navbar-nav ml-auto">
                 {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href={% url 'accounts:profile' %}>{{ user.username }}</a>
+                        <a class="nav-link" href="{% url 'accounts:profile' %}">{{ user.username }}</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'accounts:logout' %}">Вийти</a>
@@ -38,7 +49,7 @@
             </ul>
         </div>
     </nav>
-    <!-- Ваш контент -->
+    <!-- Повідомлення -->
     {% if messages %}
         <div class="container mt-3">
             {% for message in messages %}
@@ -51,7 +62,7 @@
             {% endfor %}
         </div>
     {% endif %}
-    <!-- Ваш контент -->
+    <!-- Основний контент -->
     {% block content %}{% endblock %}
     <!-- Підключення JavaScript бібліотек Bootstrap -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

@@ -8,25 +8,57 @@ def generate_unique_tracking_number():
 from geopy.geocoders import Nominatim
 from geopy.distance import geodesic
 
+
+import logging
+import geopy.distance
+
 geolocator = Nominatim(user_agent="parcel_delivery_app")
+logger = logging.getLogger(__name__)
 
 def calculate_distance(address1, address2):
-    location1 = geolocator.geocode(address1)
-    location2 = geolocator.geocode(address2)
+    # Геокодування адрес
+    coords_1 = geocode_address(address1)
+    coords_2 = geocode_address(address2)
 
-    if not location1 or not location2:
-        raise ValueError("Не вдалося геокодувати одну або обидві адреси.")
+    logger.info(f"Геокодовані координати для '{address1}': {coords_1}")
+    logger.info(f"Геокодовані координати для '{address2}': {coords_2}")
 
-    coords_1 = (location1.latitude, location1.longitude)
-    coords_2 = (location2.latitude, location2.longitude)
+    if coords_1 and coords_2:
+        distance = geopy.distance.distance(coords_1, coords_2).km
+        logger.info(f"Обчислена відстань між '{address1}' та '{address2}': {distance} км")
+        return distance
+    else:
+        logger.error("Не вдалося геокодувати одну або обидві адреси.")
+        return 0  # Або інше значення за замовчуванням
 
-    distance = geodesic(coords_1, coords_2).kilometers
-    return distance
+from geopy.geocoders import Nominatim
+
+geolocator = Nominatim(user_agent="your_app_name")
+
+def geocode_address(address):
+    try:
+        location = geolocator.geocode(address)
+        if location:
+            logger.info(f"Геокодовано адресу '{address}' до координат ({location.latitude}, {location.longitude})")
+            return (location.latitude, location.longitude)
+        else:
+            logger.error(f"Не вдалося геокодувати адресу '{address}'")
+            return None
+    except Exception as e:
+        logger.exception(f"Помилка при геокодуванні адреси '{address}': {e}")
+        return None
 
 def calculate_delivery_time(distance):
-    if distance is None or distance == 0:
-        raise ValueError("Недійсна відстань для розрахунку часу доставки.")
-    # Припустимо, що середня швидкість доставки 60 км/год
-    delivery_time_hours = distance / 60
-    # Перетворюємо години у секунди
-    return int(delivery_time_hours * 3600)
+    # Припустимо, що середня швидкість доставки 50 км/год
+    average_speed = 50  # км/год
+
+    if distance <= 0:
+        logger.warning(f"Некоректна відстань: {distance}. Встановлено мінімальний час доставки 60 секунд.")
+        return 60  # Мінімальний час доставки в секундах
+
+    time_in_hours = distance / average_speed
+    time_in_seconds = time_in_hours * 3600  # Перетворення годин у секунди
+
+    logger.info(f"Час доставки для відстані {distance} км: {time_in_seconds} секунд")
+
+    return int(time_in_seconds)

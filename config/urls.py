@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('accounts.urls')),  # Маршрут для додатку 'accounts'
     path('parcels/', include('parcels.urls', namespace='parcels')),
+    path('payments/', include('payments.urls', namespace='payments')),
 ]
