@@ -10,6 +10,7 @@ from parcels.models import Parcel
 from django.db.models import Q
 from django.utils import timezone
 from datetime import timedelta
+from payments.models import Payment
 
 def register_view(request):
     if request.method == 'POST':
@@ -37,7 +38,7 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     messages.info(request, 'Ви вийшли з аккаунта.')
-    return redirect('accounts:register')
+    return redirect('accounts:login')
 
 @login_required
 def edit_profile_view(request):
@@ -65,47 +66,56 @@ def delete_account_view(request):
 
 @login_required
 def profile_view(request):
-    # Отримуємо параметри сортування з GET-запиту
-    sort_sent_by = request.GET.get('sort_sent_by', 'tracking_number')  # Значення за замовчуванням
-    sort_received_by = request.GET.get('sort_received_by', 'tracking_number')
+    user = request.user
 
-    # Список дозволених полів для сортування
-    allowed_sort_fields_sent = ['recipient__username', 'description', 'weight', 'status', 'tracking_number']
-    allowed_sort_fields_received = ['sender__username', 'description', 'weight', 'status', 'tracking_number']
+    # Сортування
+    sort_sent_by = request.GET.get('sort_sent_by', 'recipient__username')
+    sort_received_by = request.GET.get('sort_received_by', 'sender__username')
 
-    # Перевірка дозволених полів для відправлених посилок
-    if sort_sent_by not in allowed_sort_fields_sent:
-        sort_sent_by = 'tracking_number'
+    # Відправлені посилки
+    sent_parcels = Parcel.objects.filter(sender=user).order_by(sort_sent_by)
 
-    # Перевірка дозволених полів для отриманих посилок
-    if sort_received_by not in allowed_sort_fields_received:
-        sort_received_by = 'tracking_number'
-
-    # Отримуємо відсортовані посилки
-    sent_parcels = Parcel.objects.filter(sender=request.user).order_by(sort_sent_by)
-    received_parcels = Parcel.objects.filter(recipient=request.user).order_by(sort_received_by)
-
-
-
+    # Отримані посилки
     one_hour_ago = timezone.now() - timedelta(hours=1)
-    recent_paid_parcels = Parcel.objects.filter(
-        recipient=request.user,
-        is_paid=True,
-        is_received=False,
-        paid_at__gte=one_hour_ago
+
+    received_parcels = Parcel.objects.filter(recipient=user).order_by(sort_received_by)
+
+    # Виключаємо доставлені посилки, які були доставлені більше години тому
+    received_parcels = received_parcels.exclude(
+        status='delivered',
+        is_received=True,
+        updated_at__lte=one_hour_ago
     )
 
+    payments = Payment.objects.filter(user=request.user)
+
     return render(request, 'accounts/profile.html', {
+        'user': user,
         'sent_parcels': sent_parcels,
         'received_parcels': received_parcels,
         'sort_sent_by': sort_sent_by,
         'sort_received_by': sort_received_by,
-        'recent_paid_parcels': recent_paid_parcels,
+        'payments': payments,
     })
 
+from django.shortcuts import render
+from django.contrib.auth.models import User
+from parcels.models import Parcel  # Імпортуємо модель Parcel
+
+from django.contrib.auth import get_user_model
+Pusser = get_user_model()
 def home_view(request):
-    return render(request, 'accounts/home.html')
+    # Отримуємо кількість користувачів
+    user_count = Pusser.objects.count()
 
+    # Отримуємо загальну кількість посилок
+    parcel_count = Parcel.objects.count()
 
+    # Отримуємо кількість посилок, що доставляються (наприклад, зі статусом 'in_transit')
+    delivering_parcels_count = Parcel.objects.filter(status='in_transit').count()
 
-
+    return render(request, 'accounts/home.html', {
+        'user_count': user_count,
+        'parcel_count': parcel_count,
+        'delivering_parcels_count': delivering_parcels_count,
+    })

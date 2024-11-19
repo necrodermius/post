@@ -1,5 +1,3 @@
-<!-- accounts/templates/accounts/profile.html -->
-
 {% extends 'accounts/base.html' %}
 
 {% block title %}Профіль{% endblock %}
@@ -80,53 +78,40 @@
     </form>
 
     {% if received_parcels %}
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Трек-номер</th>
-                <th>Відправник</th>
-                <th>Опис</th>
-                <th>Вага</th>
-                <th>Статус</th>
-                <th>Дії</th> <!-- Додаємо стовпець для дій -->
-            </tr>
-        </thead>
-        <tbody>
-            {% for parcel in received_parcels %}
+        <table class="table table-striped">
+            <thead>
                 <tr>
-                    <td><a href="{% url 'parcels:detail' tracking_number=parcel.tracking_number %}">{{ parcel.tracking_number }}</a></td>
-                    <td>{{ parcel.sender.username }}</td>
-                    <td>{{ parcel.description }}</td>
-                    <td>{{ parcel.weight }} кг</td>
-                    <td>{{ parcel.get_status_display }}</td>
-                    <td>
-                        {% if parcel.status == 'ready_for_pickup' and not parcel.is_paid %}
-                            <a href="{% url 'payments:pay' parcel.tracking_number %}" class="btn btn-primary btn-sm">Оплатити доставку</a>
-                        {% elif parcel.is_paid and not parcel.is_received %}
-                            <a href="{% url 'parcels:receive' parcel.tracking_number %}" class="btn btn-success btn-sm">Отримати посилку</a>
-                        {% endif %}
-                    </td>
+                    <th>Трек-номер</th>
+                    <th>Відправник</th>
+                    <th>Опис</th>
+                    <th>Вага</th>
+                    <th>Статус</th>
+                    <th>Дії</th> <!-- Додаємо стовпець для дій -->
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-{% else %}
-    <p>Наразі ви не отримуєте жодної посилки.</p>
-{% endif %}
-    <h4>Оплачені посилки (доступні протягом 1 години):</h4>
-    {% if recent_paid_parcels %}
-        <ul>
-            {% for parcel in recent_paid_parcels %}
-                <li>
-                    Трек-номер: <a href="{% url 'parcels:detail' tracking_number=parcel.tracking_number %}">{{ parcel.tracking_number }}</a>,
-                    Оплачено: {{ parcel.paid_at|date:"d.m.Y H:i" }}
-                    <a href="{% url 'parcels:receive' tracking_number=parcel.tracking_number %}" class="btn btn-success btn-sm">Отримати посилку</a>
-                </li>
-            {% endfor %}
-        </ul>
+            </thead>
+            <tbody>
+                {% for parcel in received_parcels %}
+                    <tr>
+                        <td><a href="{% url 'parcels:detail' tracking_number=parcel.tracking_number %}">{{ parcel.tracking_number }}</a></td>
+                        <td>{{ parcel.sender.username }}</td>
+                        <td>{{ parcel.description }}</td>
+                        <td>{{ parcel.weight }} кг</td>
+                        <td>{{ parcel.get_status_display }}</td>
+                        <td>
+                            {% if parcel.status == 'ready_for_pickup' and not parcel.is_paid %}
+                                <a href="{% url 'payments:pay' parcel.tracking_number %}" class="btn btn-primary btn-sm">Оплатити доставку</a>
+                            {% elif parcel.is_paid and not parcel.is_received %}
+                                <a href="{% url 'parcels:receive' parcel.tracking_number %}" class="btn btn-success btn-sm">Отримати посилку</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     {% else %}
-        <p>У вас немає оплачуваних посилок.</p>
+        <p>Наразі ви не отримуєте жодної посилки.</p>
     {% endif %}
+
 
     <!-- Кнопки внизу сторінки -->
     <div class="mt-4">

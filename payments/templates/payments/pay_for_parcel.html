@@ -8,6 +8,7 @@
     <p><strong>Відправник:</strong> {{ parcel.sender.username }}</p>
     <p><strong>Опис:</strong> {{ parcel.description }}</p>
     <p><strong>Вага:</strong> {{ parcel.weight }} кг</p>
+    <p><strong>Вартість доставки:</strong> {{ delivery_cost }} грн</p>
     <form method="post">
         {% csrf_token %}
         <button type="submit" class="btn btn-primary">Оплатити доставку</button>

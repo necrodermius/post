@@ -85,7 +85,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'HOST': '192.168.1.83',
+        'HOST': '192.168.1.82',     #'192.168.1.83',
         'PORT': 5432,
         'CONN_MAX_AGE': 30,
         'NAME': 'post',
@@ -159,8 +159,8 @@ EMAIL_USE_TLS = True
 
 # config/settings.py
 
-CELERY_BROKER_URL = 'redis://192.168.1.83:6379/0'  # Або інший брокер, який ви використовуєте
-CELERY_RESULT_BACKEND = 'redis://192.168.1.83:6379/0'
+CELERY_BROKER_URL = 'redis://192.168.1.82:6379/0'  # Або інший брокер, який ви використовуєте
+CELERY_RESULT_BACKEND = 'redis://192.168.1.82:6379/0'  #redis://192.168.1.83
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'

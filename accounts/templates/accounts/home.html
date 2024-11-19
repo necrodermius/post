@@ -12,5 +12,15 @@
     {% else %}
         <p>Будь ласка, <a href="{% url 'accounts:login' %}">увійдіть</a> або <a href="{% url 'accounts:register' %}">зареєструйтесь</a>, щоб скористатися нашими послугами.</p>
     {% endif %}
+
+    <!-- Відображення статистики -->
+    <div class="mt-5">
+        <h2>Статистика</h2>
+        <ul class="list-group">
+            <li class="list-group-item">Кількість користувачів: <strong>{{ user_count }}</strong></li>
+            <li class="list-group-item">Загальна кількість посилок: <strong>{{ parcel_count }}</strong></li>
+            <li class="list-group-item">Посилки, що доставляються: <strong>{{ delivering_parcels_count }}</strong></li>
+        </ul>
+    </div>
 </div>
 {% endblock %}

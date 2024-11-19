@@ -1,5 +1,3 @@
-# payments/models.py
-
 from django.db import models
 from django.conf import settings
 import uuid
@@ -30,4 +28,4 @@ class Payment(models.Model):
     transaction_id = models.CharField('ID транзакції', max_length=100, blank=True, null=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.amount} {self.get_status_display()}"
+        return f"{self.user.username} - {self.amount} грн - {self.get_status_display()}"

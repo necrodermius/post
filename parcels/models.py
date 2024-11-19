@@ -2,6 +2,8 @@
 
 from django.db import models
 from accounts.models import User
+from django.conf import settings
+from django.core.exceptions import ValidationError
 
 class Parcel(models.Model):
     STATUS_CHOICES = [
@@ -14,12 +16,13 @@ class Parcel(models.Model):
 
 
 
-    sender = models.ForeignKey(User, related_name='sent_parcels', on_delete=models.CASCADE, verbose_name="Відправник")
-    recipient = models.ForeignKey(User, related_name='received_parcels', on_delete=models.CASCADE, verbose_name="Отримувач")
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='sent_parcels', on_delete=models.CASCADE, verbose_name="Відправник")
+    recipient = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='received_parcels', on_delete=models.CASCADE, verbose_name="Отримувач")
     tracking_number = models.CharField(max_length=100, unique=True, verbose_name="Трек-номер")
     weight = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="Вага")
     description = models.TextField(verbose_name="Опис", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата створення")
+    updated_at = models.DateTimeField(auto_now=True)
     status = models.CharField(
         max_length=50,
         choices=STATUS_CHOICES,

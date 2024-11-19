@@ -9,18 +9,6 @@ from .tasks import process_redirected_parcel
 
 
 @login_required
-def create_parcel_view(request):
-    if request.method == 'POST':
-        form = ParcelForm(request.POST)
-        if form.is_valid():
-            parcel = form.save(sender=request.user)
-            messages.success(request, f"Посилка успішно створена! Трек-номер: {parcel.tracking_number}")
-            return redirect('parcels:detail', tracking_number=parcel.tracking_number)
-    else:
-        form = ParcelForm()
-    return render(request, 'parcels/create_parcel.html', {'form': form})
-
-@login_required
 def parcel_detail_view(request, tracking_number):
     parcel = get_object_or_404(Parcel, tracking_number=tracking_number)
     return render(request, 'parcels/parcel_detail.html', {'parcel': parcel})
@@ -29,19 +17,40 @@ def parcel_detail_view(request, tracking_number):
 
 from .tasks import process_parcel
 
+# parcels/views.py
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .forms import ParcelForm
+from django.contrib import messages
+
 @login_required
 def create_parcel_view(request):
+    user = request.user
+
+    # Перевіряємо, чи всі обов'язкові поля профілю заповнені
+    required_profile_fields = ['country', 'city', 'street', 'building', 'postal_code']
+    missing_fields = [field for field in required_profile_fields if not getattr(user, field)]
+
+    if missing_fields:
+        messages.error(request, "Ви повинні заповнити свій профіль перед відправленням посилки.")
+        return redirect('accounts:edit_profile')
+
     if request.method == 'POST':
         form = ParcelForm(request.POST)
         if form.is_valid():
-            parcel = form.save(sender=request.user)
-            messages.success(request, f"Посилка успішно створена! Трек-номер: {parcel.tracking_number}")
-            # Викликаємо асинхронне завдання
-            process_parcel.apply_async((parcel.id,), countdown=60)  # Через 1 хвилину
+            parcel = form.save(commit=False)
+            parcel.sender = user
+            parcel.save()
+            messages.success(request, "Посилка успішно створена.")
+            process_parcel.apply_async((parcel.id,), countdown=60)
             return redirect('parcels:detail', tracking_number=parcel.tracking_number)
     else:
         form = ParcelForm()
+        form.initial['sender_id'] = user.id  # Передаємо ID відправника до форми
+
     return render(request, 'parcels/create_parcel.html', {'form': form})
+
 
 @login_required
 def redirect_parcel_view(request, tracking_number):
@@ -94,5 +103,7 @@ def receive_parcel_view(request, tracking_number):
         return redirect('parcels:detail', tracking_number=tracking_number)
     return render(request, 'parcels/receive_parcel.html', {'parcel': parcel})
 
+from django.shortcuts import render
+from .models import Parcel
 
 

@@ -62,3 +62,23 @@ def calculate_delivery_time(distance):
     logger.info(f"Час доставки для відстані {distance} км: {time_in_seconds} секунд")
 
     return int(time_in_seconds)
+
+import math
+
+def calculate_delivery_cost(distance):
+    """
+    Розраховує вартість доставки на основі відстані.
+    Мінімальна ціна 60 грн, плюс 30 грн за кожні 100 км.
+    """
+    base_price = 60  # Мінімальна ціна в грн
+    additional_price_per_100km = 30  # Додаткова ціна за кожні 100 км
+
+    if distance <= 0:
+        return base_price
+
+    # Розрахунок додаткової вартості
+    additional_units = math.ceil(distance / 100)
+    additional_cost = additional_units * additional_price_per_100km
+
+    total_cost = base_price + additional_cost
+    return total_cost

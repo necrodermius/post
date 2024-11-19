@@ -29,6 +29,16 @@ class ParcelForm(forms.ModelForm):
             parcel.save()
         return parcel
 
+    def __init__(self, *args, **kwargs):
+        super(ParcelForm, self).__init__(*args, **kwargs)
+        # Відфільтровуємо користувачів з неповним профілем
+        required_profile_fields = ['country', 'city', 'street', 'building', 'postal_code']
+        users_with_complete_profile = User.objects.all()
+        for field in required_profile_fields:
+            users_with_complete_profile = users_with_complete_profile.exclude(**{f"{field}__isnull": True}).exclude(
+                **{f"{field}": ''})
+        self.fields['recipient_username'].queryset = users_with_complete_profile.exclude(id=self.initial.get('sender_id'))
+
 class RedirectParcelForm(forms.ModelForm):
     class Meta:
         model = Parcel

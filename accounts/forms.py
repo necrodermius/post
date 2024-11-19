@@ -10,8 +10,19 @@ class UserRegistrationForm(UserCreationForm):
         model = User
         fields = ('username', 'email', 'password1', 'password2')
 
+from django import forms
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
 class UserProfileForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'phone_number', 'country', 'city', 'street', 'building', 'postal_code']
-
+        fields = ['country', 'city', 'street', 'building', 'postal_code', 'email', 'first_name', 'last_name']
+        widgets = {
+            'country': forms.TextInput(attrs={'required': 'required'}),
+            'city': forms.TextInput(attrs={'required': 'required'}),
+            'street': forms.TextInput(attrs={'required': 'required'}),
+            'building': forms.TextInput(attrs={'required': 'required'}),
+            'postal_code': forms.TextInput(attrs={'required': 'required'}),
+        }
