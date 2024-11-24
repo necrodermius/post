@@ -36,6 +36,11 @@ class Parcel(models.Model):
     is_received = models.BooleanField(default=False, verbose_name="Отримано")
     paid_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата оплати")
     hidden_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата приховування")
+    custom_address = models.BooleanField(default=False, verbose_name="Використовувати власну адресу")
+    custom_recipient_address = models.CharField(
+        max_length=255, blank=True, null=True, verbose_name="Користувацька адреса отримувача"
+    )
+
 
     def __str__(self):
         return f"Посилка {self.tracking_number} від {self.sender} до {self.recipient}"
@@ -48,7 +53,9 @@ class Parcel(models.Model):
         return f"{self.sender.country}, {self.sender.city}, {self.sender.street} {self.sender.building}"
 
     def recipient_address(self):
-        if self.redirected and self.redirect_address:
+        if self.custom_address and self.custom_recipient_address:
+            return self.custom_recipient_address
+        elif self.redirected and self.redirect_address:
             return self.redirect_address
         else:
             return f"{self.recipient.country}, {self.recipient.city}, {self.recipient.street} {self.recipient.building}"

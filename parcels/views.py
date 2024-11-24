@@ -23,6 +23,12 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .forms import ParcelForm
 from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .forms import ParcelForm
+from .tasks import process_parcel
+from django.utils import timezone
 
 @login_required
 def create_parcel_view(request):
@@ -39,18 +45,22 @@ def create_parcel_view(request):
     if request.method == 'POST':
         form = ParcelForm(request.POST)
         if form.is_valid():
-            parcel = form.save(commit=False)
-            parcel.sender = user
+            parcel = form.save(commit=False, sender=user)
             parcel.save()
             messages.success(request, "Посилка успішно створена.")
+            # Запускаємо завдання для обробки посилки (якщо використовується Celery)
             process_parcel.apply_async((parcel.id,), countdown=60)
             return redirect('parcels:detail', tracking_number=parcel.tracking_number)
+        else:
+            # Відображення повідомлень про помилки форми
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{error}")
     else:
         form = ParcelForm()
         form.initial['sender_id'] = user.id  # Передаємо ID відправника до форми
 
     return render(request, 'parcels/create_parcel.html', {'form': form})
-
 
 @login_required
 def redirect_parcel_view(request, tracking_number):

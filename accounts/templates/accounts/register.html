@@ -1,4 +1,3 @@
-<!-- templates/accounts/register.html -->
 {% extends 'accounts/base.html' %}
 {% load form_tags %}
 
@@ -30,6 +29,38 @@
         <div class="form-group">
             <label for="{{ form.email.id_for_label }}">Електронна пошта</label>
             {{ form.email|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.first_name.id_for_label }}">Ім'я</label>
+            {{ form.first_name|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.last_name.id_for_label }}">Прізвище</label>
+            {{ form.last_name|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.phone_number.id_for_label }}">Номер телефону</label>
+            {{ form.phone_number|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.country.id_for_label }}">Країна</label>
+            {{ form.country|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.city.id_for_label }}">Місто</label>
+            {{ form.city|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.street.id_for_label }}">Вулиця</label>
+            {{ form.street|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.building.id_for_label }}">Будинок</label>
+            {{ form.building|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.postal_code.id_for_label }}">Поштовий індекс</label>
+            {{ form.postal_code|add_class:"form-control" }}
         </div>
         <div class="form-group">
             <label for="{{ form.password1.id_for_label }}">Пароль</label>

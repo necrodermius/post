@@ -12,33 +12,60 @@ from django.utils import timezone
 from datetime import timedelta
 from payments.models import Payment
 
+from django.shortcuts import render, redirect
+from django.contrib.auth import login
+from django.contrib import messages
+from .forms import UserRegistrationForm
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import UserRegistrationForm
+
 def register_view(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
-            form.save()
+            user = form.save(commit=False)
+            user.save()
             messages.success(request, 'Ваш аккаунт було успішно створено! Ви можете увійти.')
             return redirect('accounts:login')
+        else:
+            messages.error(request, 'Будь ласка, виправте помилки у формі.')
     else:
         form = UserRegistrationForm()
     return render(request, 'accounts/register.html', {'form': form})
 
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth import login
+from django.contrib import messages
+from .forms import CustomAuthenticationForm
+
 def login_view(request):
     if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
+        form = CustomAuthenticationForm(request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
             messages.success(request, 'Ви успішно увійшли!')
             return redirect('accounts:profile')
     else:
-        form = AuthenticationForm()
+        form = CustomAuthenticationForm()
     return render(request, 'accounts/login.html', {'form': form})
+
+
 
 def logout_view(request):
     logout(request)
     messages.info(request, 'Ви вийшли з аккаунта.')
     return redirect('accounts:login')
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .forms import UserProfileForm
 
 @login_required
 def edit_profile_view(request):
@@ -48,17 +75,39 @@ def edit_profile_view(request):
             form.save()
             messages.success(request, 'Ваш профіль було оновлено.')
             return redirect('accounts:profile')
+        else:
+            # Відображення помилок форми
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
     else:
         form = UserProfileForm(instance=request.user)
     return render(request, 'accounts/edit_profile.html', {'form': form})
 
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.contrib.auth import logout
+from parcels.models import Parcel
+from django.utils import timezone
+import uuid
+
 @login_required
 def delete_account_view(request):
     if request.method == 'POST':
-        request.user.delete()  # Видаляємо користувача
-        logout(request)        # Завершуємо сесію
+        user = request.user
+
+        # Очищаємо дані користувача
+        user.username = f'deleted_user_{uuid.uuid4()}'
+        user.email = ''
+        user.phone_number = ''
+        user.is_active = False  # Деактивуємо акаунт
+        user.set_unusable_password()  # Робимо пароль недійсним
+        user.save()
+
+        logout(request)  # Завершуємо сесію
         messages.success(request, 'Ваш обліковий запис було успішно видалено.')
-        return redirect('main:index')  # Перенаправляємо на головну сторінку після видалення
+        return redirect('accounts:home')  # Перенаправляємо на головну сторінку після видалення
     return render(request, 'accounts/delete_account.html')
 
 # accounts/views.py
@@ -87,6 +136,12 @@ def profile_view(request):
         updated_at__lte=one_hour_ago
     )
 
+    sent_parcels = sent_parcels.exclude(
+        status='delivered',
+        is_received=True,
+        updated_at__lte=one_hour_ago
+    )
+
     payments = Payment.objects.filter(user=request.user)
 
     return render(request, 'accounts/profile.html', {
@@ -99,23 +154,40 @@ def profile_view(request):
     })
 
 from django.shortcuts import render
-from django.contrib.auth.models import User
-from parcels.models import Parcel  # Імпортуємо модель Parcel
-
 from django.contrib.auth import get_user_model
+from parcels.models import Parcel
+from django.utils.timezone import now, timedelta
+
 Pusser = get_user_model()
+
 def home_view(request):
-    # Отримуємо кількість користувачів
-    user_count = Pusser.objects.count()
+    # Отримання параметрів часу з GET-запиту
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
 
-    # Отримуємо загальну кількість посилок
-    parcel_count = Parcel.objects.count()
+    # Якщо дати не задані, встановлюємо проміжок за останні 7 днів
+    if not start_date or not end_date:
+        end_date = now()
+        start_date = end_date - timedelta(days=7)
 
-    # Отримуємо кількість посилок, що доставляються (наприклад, зі статусом 'in_transit')
-    delivering_parcels_count = Parcel.objects.filter(status='in_transit').count()
+    # Перетворення дат з рядка в datetime
+    try:
+        start_date = now().strptime(start_date, '%Y-%m-%d')
+        end_date = now().strptime(end_date, '%Y-%m-%d')
+    except (TypeError, ValueError):
+        # Якщо формат невірний, встановлюємо проміжок за останні 7 днів
+        end_date = now()
+        start_date = end_date - timedelta(days=7)
+
+    # Обчислення нових користувачів і доставлених посилок
+    new_users_count = Pusser.objects.filter(date_joined__range=(start_date, end_date)).count()
+    delivered_parcels_count = Parcel.objects.filter(status='delivered', updated_at__range=(start_date, end_date)).count()
+    parcels_count = Parcel.objects.filter(created_at__range=(start_date, end_date)).count()
 
     return render(request, 'accounts/home.html', {
-        'user_count': user_count,
-        'parcel_count': parcel_count,
-        'delivering_parcels_count': delivering_parcels_count,
+        'new_users_count': new_users_count,
+        'delivered_parcels_count': delivered_parcels_count,
+        'parcels_count': parcels_count,
+        'start_date': start_date.strftime('%Y-%m-%d'),
+        'end_date': end_date.strftime('%Y-%m-%d'),
     })

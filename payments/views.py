@@ -8,6 +8,15 @@ from .models import Payment  # Імпортуємо модель Payment
 import uuid
 
 
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from parcels.models import Parcel
+from .models import Payment
+from django.utils import timezone
+import uuid
+from parcels.utils import calculate_distance, calculate_delivery_cost
+
 @login_required
 def pay_for_parcel_view(request, tracking_number):
     parcel = get_object_or_404(Parcel, tracking_number=tracking_number, recipient=request.user)
@@ -16,8 +25,8 @@ def pay_for_parcel_view(request, tracking_number):
         return redirect('parcels:detail', tracking_number=tracking_number)
 
     # Розраховуємо відстань між адресами
-    sender_address = parcel.sender_address  # Або отримуємо з parcel.sender.address
-    recipient_address = parcel.recipient_address  # Або отримуємо з parcel.recipient.address
+    sender_address = parcel.sender_address
+    recipient_address = parcel.recipient_address
 
     distance = calculate_distance(sender_address, recipient_address)
     delivery_cost = calculate_delivery_cost(distance)
@@ -31,6 +40,7 @@ def pay_for_parcel_view(request, tracking_number):
         # Створюємо запис у моделі Payment
         payment = Payment.objects.create(
             user=request.user,
+            parcel=parcel,  # Встановлюємо посилку, за яку здійснюється оплата
             amount=delivery_cost,
             payment_method='card',  # Або інший метод оплати
             status='completed',
@@ -44,3 +54,4 @@ def pay_for_parcel_view(request, tracking_number):
         'parcel': parcel,
         'delivery_cost': delivery_cost
     })
+

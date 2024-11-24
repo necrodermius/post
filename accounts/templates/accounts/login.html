@@ -26,8 +26,8 @@
         {% endif %}
         <!-- Поля форми -->
         <div class="form-group">
-            <label for="{{ form.username.id_for_label }}">Ім'я користувача</label>
-            {{ form.username|add_class:"form-control" }}
+            <label for="{{ form.username_or_phone.id_for_label }}">Ім'я користувача або номер телефону</label>
+            {{ form.username_or_phone|add_class:"form-control" }}
         </div>
         <div class="form-group">
             <label for="{{ form.password.id_for_label }}">Пароль</label>

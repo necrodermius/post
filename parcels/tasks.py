@@ -34,7 +34,10 @@ def process_parcel(parcel_id):
 
         # Обчислення відстані та часу доставки
         sender_address = parcel.sender_address()
-        recipient_address = parcel.recipient_address()
+        if parcel.custom_address and parcel.custom_recipient_address:
+            recipient_address = parcel.custom_recipient_address
+        else:
+            recipient_address = parcel.recipient_address()
         distance = calculate_distance(sender_address, recipient_address)
         delivery_time = calculate_delivery_time(distance)
         logger.info(f"Розрахований час доставки для посилки {parcel_id}: {delivery_time} секунд")

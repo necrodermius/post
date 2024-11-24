@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 import uuid
+from parcels.models import Parcel  # Не забудьте імпортувати модель Parcel
 
 class Payment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -21,6 +22,12 @@ class Payment(models.Model):
         related_name='payments',
         verbose_name='Користувач'
     )
+    parcel = models.ForeignKey(
+        Parcel,
+        on_delete=models.CASCADE,
+        related_name='payments',
+        verbose_name='Посилка'
+    )
     amount = models.DecimalField('Сума', max_digits=10, decimal_places=2)
     payment_method = models.CharField('Метод оплати', max_length=50, choices=PAYMENT_METHODS)
     timestamp = models.DateTimeField('Час платежу', auto_now_add=True)
@@ -28,4 +35,4 @@ class Payment(models.Model):
     transaction_id = models.CharField('ID транзакції', max_length=100, blank=True, null=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.amount} грн - {self.get_status_display()}"
+        return f"{self.user.username} - {self.amount} грн - {self.get_status_display()} - {self.parcel.tracking_number}"

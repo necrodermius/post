@@ -1,5 +1,5 @@
 {% extends 'parcels/base.html' %}
-
+{% load form_tags %}
 {% block title %}Відправити посилку{% endblock %}
 
 {% block content %}
@@ -7,8 +7,63 @@
     <h2>Відправити посилку</h2>
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
+        <!-- Відображення помилок форми -->
+        {% if form.errors %}
+            <div class="alert alert-danger">
+                <strong>Будь ласка, виправте наступні помилки:</strong>
+                <ul>
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        <!-- Поле "Ім'я користувача або номер телефону отримувача" -->
+        <div class="form-group">
+            <label for="{{ form.recipient_identifier.id_for_label }}">{{ form.recipient_identifier.label }}</label>
+            {{ form.recipient_identifier }}
+        </div>
+        <!-- Поле "Вага" -->
+        <div class="form-group">
+            <label for="{{ form.weight.id_for_label }}">{{ form.weight.label }}</label>
+            {{ form.weight }}
+        </div>
+        <!-- Поле "Опис" -->
+        <div class="form-group">
+            <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+            {{ form.description }}
+        </div>
+        <!-- Поле "Відправити на іншу адресу" -->
+        <div class="form-check">
+            <label class="form-check-label" for="{{ form.custom_address.id_for_label }}">
+                {{ form.custom_address }} {{ form.custom_address.label }}
+            </label>
+        </div>
+        <!-- Поле "Нова адреса отримувача" -->
+        <div id="custom_address_fields" style="display: none;">
+            <div class="form-group">
+                <label for="{{ form.custom_recipient_address.id_for_label }}">{{ form.custom_recipient_address.label }}</label>
+                {{ form.custom_recipient_address }}
+            </div>
+        </div>
         <button type="submit" class="btn btn-primary">Відправити</button>
     </form>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkbox = document.getElementById("{{ form.custom_address.id_for_label }}");
+        const customAddressFields = document.getElementById("custom_address_fields");
+
+        checkbox.addEventListener('change', function() {
+            if (checkbox.checked) {
+                customAddressFields.style.display = 'block';
+            } else {
+                customAddressFields.style.display = 'none';
+            }
+        });
+    });
+</script>
 {% endblock %}
