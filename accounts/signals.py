@@ -8,22 +8,40 @@ from .models import User
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 from parcels.models import Parcel
+from .admin_logging import admin_log
+
+
 
 @receiver(post_save, sender=User)
+#@admin_log("Welcome email sent to {instance.email}")
 def send_welcome_email(sender, instance, created, **kwargs):
+
     if created:
         # Відправка вітального електронного листа
         send_mail(
             'Ласкаво просимо до нашого поштового сервісу!',
             'Дякуємо за реєстрацію в нашому сервісі. Ми раді вітати вас!',
-            'maksym.putin.django@gmail.com',  # Замість цього вкажіть вашу електронну адресу
+            'maksym.putin.django@gmail.com',
             [instance.email],
             fail_silently=False,
         )
 
-# parcels/signals.py
+
+@receiver(post_save, sender=Parcel)
+#@admin_log("{instance} status updated to {instance.status}")
+def parcel_status_updated(sender, instance, created, **kwargs):
+    if not created:
+        if instance._original_status != instance.status:
+            # Статус змінився
+            new_status = instance.status
+            if new_status == 'Доставлено':
+                pass
+        # Оновлюємо початковий статус
+        instance._original_status = instance.status
+
 
 @receiver(pre_save, sender=Parcel)
+#@admin_log("Original status cached for Parcel   {instance}")
 def parcel_pre_save(sender, instance, **kwargs):
     if instance.pk:
         try:
@@ -33,16 +51,3 @@ def parcel_pre_save(sender, instance, **kwargs):
             instance._original_status = None
     else:
         instance._original_status = None
-
-
-@receiver(post_save, sender=Parcel)
-def parcel_status_updated(sender, instance, created, **kwargs):
-    if not created:
-        if instance._original_status != instance.status:
-            # Статус змінився
-            new_status = instance.status
-            if new_status == 'Доставлено':
-                # Виконуємо потрібні дії
-                pass
-        # Оновлюємо початковий статус
-        instance._original_status = instance.status

@@ -74,7 +74,7 @@ TEMPLATES = [
 ]
 
 
-LOGOUT_REDIRECT_URL = '/admin/login/'
+
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
@@ -85,9 +85,8 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'HOST': '192.168.1.82',     #'192.168.1.83',
+        'HOST': '192.168.1.77',     #'192.168.1.83',
         'PORT': 5432,
-        'CONN_MAX_AGE': 30,
         'NAME': 'post',
         'USER': 'postgres',
         'PASSWORD': 'hesoyam',
@@ -144,9 +143,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # settings.py
 
 ADMINS = [('Maksym Putin', 'maksym.putin.django@gmail.com')]
-LOGIN_REDIRECT_URL = 'index'
-LOGOUT_REDIRECT_URL = 'index'
+LOGIN_REDIRECT_URL = ''
+LOGOUT_REDIRECT_URL = ''
 LOGIN_URL = 'accounts:login'
+LOGOUT_URL = 'home'
+ADMIN_LOGOUT_REDIRECT_URL = 'home'
+ADMIN_LOGOUT_URL = 'home'
 
 
 # Налаштування електронної пошти
@@ -154,13 +156,13 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'maksym.putin.django@gmail.com'
-EMAIL_HOST_PASSWORD = 'gnuy ntsi tkyc ytym'
+EMAIL_HOST_PASSWORD = 'lwoc lcnb cbxj iyof'
 EMAIL_USE_TLS = True
 
 # config/settings.py
 
-CELERY_BROKER_URL = 'redis://192.168.1.82:6379/0'  # Або інший брокер, який ви використовуєте
-CELERY_RESULT_BACKEND = 'redis://192.168.1.82:6379/0'  #redis://192.168.1.83
+CELERY_BROKER_URL = 'redis://192.168.1.77:6379/0'  # Або інший брокер, який ви використовуєте
+CELERY_RESULT_BACKEND = 'redis://192.168.1.77:6379/0'  #redis://192.168.1.83
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
